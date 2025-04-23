@@ -14,7 +14,7 @@ class WebSearchService:
     def web_search(self, query: str):
         results = []
         try:
-            response = tavily_client.search(query, max_results=1, search_depth="basic", chunks_per_source=1)
+            response = tavily_client.search(query, max_results=5, search_depth="basic")
             search_results = response.get("results", [])
 
             for result in search_results:

@@ -1,8 +1,8 @@
 from fastapi import FastAPI, WebSocket
-from server.pydantic_models.request_body import ChatBody
-from server.services.web_search_service import WebSearchService
-from server.services.relevant_sources_service import RelevantSourcesService
-from server.services.gemini_service import GeminiService
+from pydantic_models.request_body import RequestBody
+from services.web_search_service import WebSearchService
+from services.relevant_sources_service import RelevantSourcesService
+from services.gemini_service import GeminiService
 import traceback
 import asyncio
 
@@ -43,7 +43,7 @@ async def websocket_search_query_endpoint(websocket: WebSocket):
 
 # Post request to get query from user and return an LLM-generatred answer to the query
 @app.post("/search-query")
-def search_query_endpoint(body: ChatBody):
+def search_query_endpoint(body: RequestBody):
     search_results = search_service.web_search(body.query)
     relevant_results = relevant_sources_service.sort_sources(body.query, search_results)
     llm_response = gemini_service.generate_llm_response(body.query, relevant_results)
