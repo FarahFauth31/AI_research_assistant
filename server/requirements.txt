@@ -1,0 +1,10 @@
+sentence-transformers
+fastapi[standard]
+python-dotenv
+pydantic-settings
+google-genai
+tavily-python
+crawl4ai
+trafilatura
+numpy
+pydantic
