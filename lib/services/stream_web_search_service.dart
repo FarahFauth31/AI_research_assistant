@@ -16,19 +16,37 @@ class StreamWebService {
 
   //Listen to data sent to/from server
   void connect() {
-    _socket = WebSocket(Uri.parse("ws://localhost:8000/ws/search-query"));
-    _socket!.messages.listen((message) {
-      final data = json.decode(message);
-      if (data['type'] == 'search_result') {
-        _searchResultController.add(data);
-      } else if (data['type'] == 'content') {
-        _contentController.add(data);
-      }
-    });
+    try {
+      _socket = WebSocket(Uri.parse("ws://localhost:8000/ws/search-query"));
+      _socket!.messages.listen((message) {
+        try {
+          final data = json.decode(message);
+          if (data['type'] == 'search_result') {
+            _searchResultController.add(data);
+          } else if (data['type'] == 'content') {
+            _contentController.add(data);
+          } else {
+            print("Unknown message type: ${data['type']}");
+          }
+        } catch (e) {
+          print("Error decoding message: $e");
+        }
+      });
+    } catch (e) {
+      print("Failed to connect to WebSocket: $e");
+    }
   }
 
   //Send data to server
   void chat(String query) {
-    _socket!.send(json.encode({'query': query}));
+    if (_socket != null) {
+      try {
+        _socket!.send(json.encode({'query': query}));
+      } catch (e) {
+        print("Failed to send message: $e");
+      }
+    } else {
+      print("WebSocket is not connected. Message not sent.");
+    }
   }
 }

@@ -1,0 +1,15 @@
+Why embeddings?
+
+From building intelligent retrieval augmented generation (RAG) and recommendation systems to text classification, the ability for LLMs to understand the meaning behind text is crucial. Embeddings are often critical for building more efficient systems, reducing cost and latency while also generally providing better results than keyword matching systems. Embeddings capture semantic meaning and context through numerical representations of data. Data with similar semantic meaning have embeddings that are closer together. Embeddings enable a wide range of applications, including:
+
+    Efficient Retrieval: Find relevant documents within large databases, like legal document retrieval or enterprise search, by comparing the embeddings of queries and documents.
+
+    Retrieval-Augmented Generation (RAG): Enhance the quality and relevance of generated text by retrieving and incorporating contextually relevant information into the context of a model.
+
+    Clustering and Categorization: Group similar texts together, identifying trends and topics within your data.
+
+    Classification: Automatically categorize text based on its content, such as sentiment analysis or spam detection.
+
+    Text Similarity: Identify duplicate content, enabling tasks like web page deduplication or plagiarism detection.
+
+You can learn more about embeddings and common AI use cases in the Gemini API docs.

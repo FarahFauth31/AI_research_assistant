@@ -8,3 +8,6 @@ crawl4ai
 trafilatura
 numpy
 pydantic
+pinecone
+smolagents
+llama-cloud-services
