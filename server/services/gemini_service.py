@@ -16,7 +16,7 @@ class GeminiService:
         )
         self.model = "gemini-2.0-flash"
     
-    def return_full_prompt(self, query: str, search_results: list[dict]):
+    def return_full_prompt(self, query: str, search_results: list[dict]) -> str:
         if search_results:
             context_text = "\n\n".join([
                 f"Source {i+1} {result['url']}:\n{result['content']}"
@@ -35,7 +35,7 @@ class GeminiService:
         """
         return full_prompt
 
-    def generate_llm_response(self, query: str, search_results: list[dict]):
+    def generate_llm_response(self, query: str, search_results: list[dict]) -> str:
         full_prompt = self.return_full_prompt(query, search_results)
 
         try:
@@ -43,27 +43,10 @@ class GeminiService:
                 model=self.model, contents=full_prompt,
             )
             return response.text
-
-        except errors.APIError as e:
-            logging.error(f"The API error with error code {e.code} and error message {e.message} was thrown by the Gemini Service.", exc_info=True)
-            return "No response could be created at this time."
-        except errors.ClientError as e:
-            logging.error(f"The Client error with error code {e.code} and error message {e.message} was thrown by the Gemini Service.", exc_info=True)
-            return "No response could be created at this time."
-        except errors.ServerError as e:
-            logging.error(f"The Server error with error code {e.code} and error message {e.message} was thrown by the Gemini Service.", exc_info=True)
-            return "No response could be created at this time."
-        except errors.UnknownFunctionCallArgumentError as e:
-            logging.error(f"The Unknown Function Call Argument error with error code {e.code} and error message {e.message} was thrown by the Gemini Service.", exc_info=True)
-            return "No response could be created at this time."
-        except errors.UnsupportedFunctionError as e:
-            logging.error(f"The Unsupported Function error with error code {e.code} and error message {e.message} was thrown by the Gemini Service.", exc_info=True)
-            return "No response could be created at this time."
-        except errors.FunctionInvocationError as e:
-            logging.error(f"The Function Invocation error with error code {e.code} and error message {e.message} was thrown by the Gemini Service.", exc_info=True)
-            return "No response could be created at this time."
-        except pydantic.ValidationError as e:
-            logging.error(f"The Validation error with error code {e.code} and error message {e.message} was thrown by the Gemini Service.", exc_info=True)
+        except (errors.APIError, errors.ClientError, errors.ServerError, 
+        errors.UnknownFunctionCallArgumentError, errors.UnsupportedFunctionError,
+        errors.FunctionInvocationError, pydantic.ValidationError) as e:
+            logging.error(f"Error in Gemini Service: {type(e).__name__}: {e}", exc_info=True)
             return "No response could be created at this time."
 
     def generate_streamed_llm_response(self, query: str, search_results: list[dict]):
@@ -76,26 +59,10 @@ class GeminiService:
             for chunk in response:
                 yield chunk.text
 
-        except errors.APIError as e:
-            logging.error(f"The API error with error code {e.code} and error message {e.message} was thrown by the Gemini Service.", exc_info=True)
-            return "No response could be created at this time."
-        except errors.ClientError as e:
-            logging.error(f"The Client error with error code {e.code} and error message {e.message} was thrown by the Gemini Service.", exc_info=True)
-            return "No response could be created at this time."
-        except errors.ServerError as e:
-            logging.error(f"The Server error with error code {e.code} and error message {e.message} was thrown by the Gemini Service.", exc_info=True)
-            return "No response could be created at this time."
-        except errors.UnknownFunctionCallArgumentError as e:
-            logging.error(f"The Unknown Function Call Argument error with error code {e.code} and error message {e.message} was thrown by the Gemini Service.", exc_info=True)
-            return "No response could be created at this time."
-        except errors.UnsupportedFunctionError as e:
-            logging.error(f"The Unsupported Function error with error code {e.code} and error message {e.message} was thrown by the Gemini Service.", exc_info=True)
-            return "No response could be created at this time."
-        except errors.FunctionInvocationError as e:
-            logging.error(f"The Function Invocation error with error code {e.code} and error message {e.message} was thrown by the Gemini Service.", exc_info=True)
-            return "No response could be created at this time."
-        except pydantic.ValidationError as e:
-            logging.error(f"The Validation error with error code {e.code} and error message {e.message} was thrown by the Gemini Service.", exc_info=True)
+        except (errors.APIError, errors.ClientError, errors.ServerError, 
+        errors.UnknownFunctionCallArgumentError, errors.UnsupportedFunctionError,
+        errors.FunctionInvocationError, pydantic.ValidationError) as e:
+            logging.error(f"Error in Gemini Service: {type(e).__name__}: {e}", exc_info=True)
             return "No response could be created at this time."
 
 

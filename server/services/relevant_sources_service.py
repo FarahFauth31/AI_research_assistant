@@ -7,7 +7,7 @@ import logging
 class RelevantSourcesService:
     """This service gives scores to sources using cos similarity scores and returns the most relevant ones in descending order."""
     def __init__(self):
-        self.embedding_model = SentenceTransformer("all-MiniLM-L6-v2")
+        self.embedding_model = SentenceTransformer("multi-qa-distilbert-cos-v1")
     
     def sort_sources(self, query: str, search_results: List[dict]):
         relevant_docs = []

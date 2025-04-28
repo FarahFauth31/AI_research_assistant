@@ -3,6 +3,7 @@ from pydantic_models.request_body import RequestBody
 from services.web_search_service import WebSearchService
 from services.relevant_sources_service import RelevantSourcesService
 from services.gemini_service import GeminiService
+from services.pinecone_service import PineconeDB
 import traceback
 import asyncio
 
@@ -11,6 +12,7 @@ app = FastAPI()
 search_service = WebSearchService()
 relevant_sources_service = RelevantSourcesService()
 gemini_service = GeminiService()
+db = PineconeDB()
 
 # Search query websocket to stream an LLM response based on the user's query
 @app.websocket("/ws/search-query")

@@ -8,6 +8,7 @@ from llama_cloud_services import LlamaParse
 from sentence_transformers import SentenceTransformer
 import pydantic
 import logging
+from datetime import datetime
 
 settings = Settings()
 
@@ -30,18 +31,7 @@ class PineconeDB:
         return text_document[0].text
 
 
-    def chunk_text_by_multi_paragraphs(self, text: str, max_chunk_size: int = 200, min_chunk_size: int = 100) -> list[str]:
-        """
-        Split text into chunks at paragraph boundaries while respecting min and max chunk sizes.
-        
-        Args:
-            text: The input text to be split
-            max_chunk_size: The maximum size of each chunk
-            min_chunk_size: The minimum size of each chunk
-        
-        Returns:
-            A list of text chunks
-        """
+    def chunk_text_by_multi_paragraphs(self, text: str, max_chunk_size: int = 1500, min_chunk_size: int = 500) -> list[str]:
         chunks = []
         current_chunk = ""
         
@@ -77,67 +67,61 @@ class PineconeDB:
         
         return chunks
     
-    def embed_chunks(self, chunks: list[str]):
-        print("vectorizing now...")
+    def embed_chunks(self, chunks: list[str]) -> list:
+        logging.info("vectorizing now...")
         vectorized_chunks = []
         for chunk in chunks:
             embedding = self.embedding_model.encode(chunk)
             vectorized_chunks.append(embedding)
         return vectorized_chunks
-
-
     
+    def upsert(self, chunks: list[str], vectorized_chunks, name_doc: str, namespace: str = "ns2"):
+        logging.info("saving vectors...")
+        vectors=[]
+        for i, (vec, chunk_text) in enumerate(zip(vectorized_chunks, chunks)):
+            vector_dict = {
+                "id": f"{name_doc}_chunk{i}",
+                "values": vec,
+                "metadata": {"text": chunk_text}
+            }
+            vectors.append(vector_dict)
 
+        self.index.upsert(
+            vectors=vectors,
+            namespace=namespace
+        )
+    
+    def retrieve_results(self, query: str, namespace: str = "ns2"):
+        retrieved_results = []
+        query_embedding = self.embedding_model.encode(query).tolist()
+        results = self.index.query(
+            namespace=namespace,
+            top_k=5,
+            include_values=True,
+            include_metadata=True,
+            vector=query_embedding
+        )
+        if results['matches']:
+            for match in results['matches']:
+                if match.get('score', 0) > 0.7:
+                    result_dict = {
+                        "id": match.get('id', 0),
+                        "score": match.get('score', 0),
+                        "text": match.get('metadata', None).get('text', "")
+                    }
+                    retrieved_results.append(result_dict)
+        return retrieved_results
+        
+    def store_search_results(self, text: str):
+        chunks = self.chunk_text_by_multi_paragraphs(text)
+        embeddings = self.embed_chunks(chunks)
+        self.upsert(chunks, embeddings, datetime.now())
 
-"""
-
-index.upsert(
-
-    vectors=[
-
-        {
-
-            "id": "vec1", 
-
-            "values": [1.0, 1.5], 
-
-            "metadata": {"genre": "drama"}
-
-        }, {
-
-            "id": "vec2", 
-
-            "values": [2.0, 1.0], 
-
-            "metadata": {"genre": "action"}
-
-        }, {
-
-            "id": "vec3", 
-
-            "values": [0.1, 0.3], 
-
-            "metadata": {"genre": "drama"}
-
-        }, {
-
-            "id": "vec4", 
-
-            "values": [1.0, -2.5], 
-
-            "metadata": {"genre": "action"}
-
-        }
-
-    ],
-
-    namespace= "ns1"
-
-) """
 
 if __name__ == "__main__":
     db = PineconeDB()
-    text_doc = db.parse_pdf(file_path="/home/farah/Desktop/git_ai_research_assistant/a-practical-guide-to-building-agents.pdf")
+    db.store_search_results("What are you doing?")
+    """ text_doc = db.parse_pdf(file_path="/home/farah/Desktop/git_ai_research_assistant/a-practical-guide-to-building-agents.pdf")
     chunks = db.chunk_text_by_multi_paragraphs(text_doc)
     embeddings = db.embed_chunks(chunks)
-    print(embeddings)
+    db.upsert(chunks=chunks, vectorized_chunks=embeddings, name_doc="OpenAI_ai_agent_guide") """
